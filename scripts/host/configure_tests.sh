@@ -4,6 +4,8 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.." && devbox_dir=$PWD
 
 source "${devbox_dir}/scripts/functions.sh"
 
+get_config_value="${devbox_dir}/scripts/get_config_value.sh"
+
 status "Creating configuration for Magento Tests"
 incrementNestingLevel
 
@@ -29,7 +31,7 @@ if [[ ! -f "${magento_tests_root}/integration/phpunit.xml" ]] && [[ -f "${magent
     if [[ ! -f "${magento_tests_root}/integration/etc/install-config-mysql.php" ]] && [[ -f "${magento_tests_root}/integration/etc/install-config-mysql.php.dist" ]]; then
         cp "${magento_tests_root}/integration/etc/install-config-mysql.php.dist" "${magento_tests_root}/integration/etc/install-config-mysql.php"
         sed -i.back "s|'db-host' => 'localhost'|'db-host' => 'magento2-mysql'|g" "${magento_tests_root}/integration/etc/install-config-mysql.php"
-        sed -i.back "s|'db-name' => 'magento_integration_tests'|'db-name' => 'magento_$(getContext)_integration_tests'|g" "${magento_tests_root}/integration/etc/install-config-mysql.php"
+        sed -i.back "s|'db-name' => 'magento_integration_tests'|'db-name' => '$(bash ${get_config_value} "magento_database_name")_integration_tests'|g" "${magento_tests_root}/integration/etc/install-config-mysql.php"
         sed -i.back "s|'amqp-host' => 'localhost'|'amqp-host' => 'magento2-rabbitmq'|g" "${magento_tests_root}/integration/etc/install-config-mysql.php"
         sed -i.back "s|'amqp-user' => 'guest'|'amqp-user' => 'admin'|g" "${magento_tests_root}/integration/etc/install-config-mysql.php"
         sed -i.back "s|'amqp-password' => 'guest'|'amqp-password' => '123123q'|g" "${magento_tests_root}/integration/etc/install-config-mysql.php"

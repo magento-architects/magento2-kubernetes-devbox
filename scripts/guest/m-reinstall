@@ -26,7 +26,7 @@ setupOptions[currency]="$(bash ${get_config_value} "magento_currency")"
 setupOptions[admin_user]="$(bash ${get_config_value} "magento_admin_user")"
 setupOptions[admin_password]="$(bash ${get_config_value} "magento_admin_password")"
 setupOptions[db_host]='magento2-mysql'
-setupOptions[db_name]="magento_$(getContext)"
+setupOptions[db_name]="$(bash ${get_config_value} "magento_database_name")"
 setupOptions[db_user]='root'
 setupOptions[db_password]='123123q'
 setupOptions[base_url]="http://${magento_host_name}/"
@@ -86,16 +86,16 @@ install_cmd="./bin/magento setup:install \
     --use-rewrites=1"
 
 # Configure Rabbit MQ
-if [[ -d "${DEVBOX_ROOT}/$(getContext)/app/code/Magento/MessageQueue" ]] || [[ -d "${DEVBOX_ROOT}/$(getContext)/vendor/magento/module-message-queue" ]]; then
-    install_cmd="${install_cmd} \
-    --amqp-host=${setupOptions[amqp_host]} \
-    --amqp-port=${setupOptions[amqp_port]} \
-    --amqp-user=${setupOptions[amqp_user]} \
-    --amqp-virtualhost=${setupOptions[amqp_virtualhost]} \
-    --amqp-ssl=false \
-    --amqp-ssl-options=[] \
-    --amqp-password=${setupOptions[amqp_password]}"
-fi
+#if [[ -d "${DEVBOX_ROOT}/$(getContext)/app/code/Magento/MessageQueue" ]] || [[ -d "${DEVBOX_ROOT}/$(getContext)/vendor/magento/module-message-queue" ]]; then
+#    install_cmd="${install_cmd} \
+#    --amqp-host=${setupOptions[amqp_host]} \
+#    --amqp-port=${setupOptions[amqp_port]} \
+#    --amqp-user=${setupOptions[amqp_user]} \
+#    --amqp-virtualhost=${setupOptions[amqp_virtualhost]} \
+#    --amqp-ssl=false \
+#    --amqp-ssl-options=[] \
+#    --amqp-password=${setupOptions[amqp_password]}"
+#fi
 
 # TODO: Permission denied
 #sudo chmod +x bin/magento
@@ -104,10 +104,10 @@ php ${install_cmd} 2> >(logError) > >(log)
 # Comment out the line above and uncomment the one below to debug Magento Setup script
 # php -d xdebug.remote_autostart=1 ${install_cmd} 2> >(logError) > >(log)
 
-status "Configuring Redis for session and as cache backend"
-php "${DEVBOX_ROOT}/$(getContext)/bin/magento" setup:config:set --page-cache=redis --page-cache-redis-server=magento2-redis-master
-php "${DEVBOX_ROOT}/$(getContext)/bin/magento" setup:config:set --cache-backend=redis --cache-backend-redis-server=magento2-redis-master
-php "${DEVBOX_ROOT}/$(getContext)/bin/magento" setup:config:set --session-save=redis --session-save-redis-host=magento2-redis-master
+#status "Configuring Redis for session and as cache backend"
+#php "${DEVBOX_ROOT}/$(getContext)/bin/magento" setup:config:set --page-cache=redis --page-cache-redis-server=magento2-redis-master
+#php "${DEVBOX_ROOT}/$(getContext)/bin/magento" setup:config:set --cache-backend=redis --cache-backend-redis-server=magento2-redis-master
+#php "${DEVBOX_ROOT}/$(getContext)/bin/magento" setup:config:set --session-save=redis --session-save-redis-host=magento2-redis-master
 
 if [[ $? != 0 ]]; then
     error "Magento installation failed."
@@ -116,9 +116,9 @@ fi
 
 bash "${devbox_dir}/scripts/guest/configure_varnish" -f
 
-bash "${DEVBOX_ROOT}/scripts/guest/configure_search_engine"
-bash "${DEVBOX_ROOT}/scripts/guest/change_magento_config_for_functional_tests"
-bash "${DEVBOX_ROOT}/scripts/guest/update_magento_config" 'admin/security/session_lifetime' '86400'
+#bash "${DEVBOX_ROOT}/scripts/guest/configure_search_engine"
+#bash "${DEVBOX_ROOT}/scripts/guest/change_magento_config_for_functional_tests"
+#app/code/Magento/Authorization/Model/ResourceModel/Role.phpbash "${DEVBOX_ROOT}/scripts/guest/update_magento_config" 'admin/security/session_lifetime' '86400'
 
 export SKIP_CACHE_CLEAN=0
 bash "${DEVBOX_ROOT}/scripts/guest/m-clear-cache"
